@@ -1,72 +1,28 @@
-# 🔍 OSINT Intelligence Dashboard
+# 🕵️‍♂️ OSINT Intelligence Dashboard
 
-This project is a custom-built Open-Source Intelligence (OSINT) dashboard that consolidates threat intelligence from multiple sources into a centralized and visual interface. Built with **Flask** and integrated with **Power BI**, this tool helps with early threat detection, profiling, and situational awareness.
+**OSINT Intelligence Dashboard** is a modular, open-source platform for collecting, analyzing, and visualizing open-source intelligence (OSINT) data from multiple sources.  
+It’s designed for **cybersecurity analysts, threat hunters, researchers, and OSINT investigators** who need to unify their intelligence workflow in a single place.
 
----
-
-## 🧠 Purpose
-
-To assist cybersecurity professionals, blue teams, and researchers in collecting, organizing, and analyzing public data on IPs, domains, malware hashes, and threat actors from a single, user-friendly interface.
-
----
-
-## 🧰 Stack & Technologies
-
-- **Backend:** Python 3.x + Flask
-- **Frontend:** HTML + Bootstrap (Flask templates)
-- **Data Visualization:** Power BI Embedded + Pandas
-- **APIs Used:**
-  - Shodan
-  - VirusTotal
-  - AbuseIPDB
-  - WhoisXML
-  - BuiltWith
-  - Custom Threat Feed JSON
+## ✨ Features
+- **Data Collection** from social media, threat feeds, domain/IP lookups, and custom scrapers
+- **Enrichment Pipelines** for WHOIS, DNS, GeoIP, VirusTotal, and more
+- **Search & Indexing** with OpenSearch for lightning-fast queries
+- **Visualization & Analysis** via React-based dashboards and Power BI integration
+- **Alerting Engine** for rule-based notifications on indicators of interest
+- **Exporting** to CSV, JSON, and Power BI templates
+- **Extensible Collectors** for adding your own data sources
 
 ---
 
-## 🚨 Key Features
-
-| Feature                         | Description                                      |
-|--------------------------------|--------------------------------------------------|
-| 🔍 Search Dashboard             | Lookup by IP, Domain, Email, or Hash             |
-| 📊 Power BI Visuals            | Real-time visualization of feed trends           |
-| 🧩 Modular API Integration     | Easily add/remove data sources via config files  |
-| 📝 Report Generation           | Export PDF/CSV threat reports                    |
-| 🔐 API Key Vault               | Secure API management via `.env` file            |
-
----
-
-## 🧪 Example Use Cases
-
-- Incident response enrichment
-- Threat actor infrastructure mapping
-- Campaign pattern tracking
-- IP/domain risk scoring for firewall rules
-- Automated OSINT collection
-
----
-
-## 📸 Screenshots
-
-> _(Stored in `/docs/`)_
-
-![OSINT Dashboard Screenshot](docs/osint-ui-screenshot.png)
-
----
-
-## 📁 Folder Structure
-
-```bash
-osint-dashboard/
-├── app/
-│   ├── templates/
-│   ├── static/
-│   ├── routes/
-│   └── api_clients/
-├── docs/
-│   └── osint-ui-screenshot.png
-├── .env.example
-├── requirements.txt
-├── app.py
-└── README.md
+## 📂 Project Structure
+```text
+apps/
+  api/         # FastAPI backend (REST + WebSocket)
+  web/         # React/Tailwind frontend
+  collectors/  # OSINT data collection jobs
+  workers/     # Async tasks & enrichment
+config/        # Settings, env templates
+infra/         # Docker Compose, database, OpenSearch configs
+scripts/       # Development & maintenance scripts
+powerbi/       # Power BI templates
+docs/          # Architecture, API, and collector notes
