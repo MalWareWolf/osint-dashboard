@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Simple OSINT Dashboard with GUI for Windows.
+
+This script provides a basic graphical interface for performing
+common open‑source intelligence (OSINT) lookups such as WHOIS,
+DNS resolution and IP geolocation.  It is designed to be lightweight
+and run out of the box on Windows using the standard Tkinter library.
+
+Dependencies:
+    pip install requests python-whois
+
+"""
+from __future__ import annotations
+
+import json
+import socket
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext
+
+try:  # Optional import for WHOIS lookups
+    import whois  # type: ignore
+except Exception:  # pragma: no cover - handled gracefully
+    whois = None
+
+import requests
+
+
+class OSINTDashboard(tk.Tk):
+    """Main window for OSINT Dashboard."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.title("OSINT Dashboard")
+        self.geometry("600x400")
+        self._build_widgets()
+
+    # ------------------------------------------------------------------
+    def _build_widgets(self) -> None:
+        """Create and place widgets in the window."""
+        main_frame = ttk.Frame(self, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        entry_label = ttk.Label(main_frame, text="IP/Domain")
+        entry_label.grid(row=0, column=0, sticky=tk.W)
+
+        self.target_var = tk.StringVar()
+        entry = ttk.Entry(main_frame, textvariable=self.target_var, width=40)
+        entry.grid(row=0, column=1, columnspan=3, sticky=tk.EW, padx=(5, 0))
+        entry.focus()
+
+        whois_btn = ttk.Button(main_frame, text="WHOIS", command=self.do_whois)
+        whois_btn.grid(row=1, column=0, pady=5, sticky=tk.EW)
+
+        dns_btn = ttk.Button(main_frame, text="DNS", command=self.do_dns)
+        dns_btn.grid(row=1, column=1, pady=5, sticky=tk.EW)
+
+        geo_btn = ttk.Button(main_frame, text="GeoIP", command=self.do_geoip)
+        geo_btn.grid(row=1, column=2, pady=5, sticky=tk.EW)
+
+        clear_btn = ttk.Button(main_frame, text="Clear", command=self.clear_output)
+        clear_btn.grid(row=1, column=3, pady=5, sticky=tk.EW)
+
+        self.output = scrolledtext.ScrolledText(main_frame, wrap=tk.WORD, height=15)
+        self.output.grid(row=2, column=0, columnspan=4, sticky=tk.NSEW)
+
+        # Configure grid weights for resizing
+        for i in range(4):
+            main_frame.columnconfigure(i, weight=1)
+        main_frame.rowconfigure(2, weight=1)
+
+    # ------------------------------------------------------------------
+    def _get_target(self) -> str | None:
+        target = self.target_var.get().strip()
+        if not target:
+            messagebox.showwarning("Missing Input", "Please enter an IP address or domain name.")
+            return None
+        return target
+
+    # ------------------------------------------------------------------
+    def do_whois(self) -> None:
+        target = self._get_target()
+        if not target or whois is None:
+            if whois is None:
+                messagebox.showerror("Dependency Missing", "python-whois package is not installed")
+            return
+        try:
+            data = whois.whois(target)
+            output = json.dumps(data, indent=2, default=str)
+        except Exception as exc:  # pragma: no cover - network dependent
+            output = f"WHOIS lookup failed: {exc}"
+        self._append_output(output)
+
+    # ------------------------------------------------------------------
+    def do_dns(self) -> None:
+        target = self._get_target()
+        if not target:
+            return
+        try:
+            ip_addr = socket.gethostbyname(target)
+            output = json.dumps({"hostname": target, "ip": ip_addr}, indent=2)
+        except Exception as exc:
+            output = f"DNS resolution failed: {exc}"
+        self._append_output(output)
+
+    # ------------------------------------------------------------------
+    def do_geoip(self) -> None:
+        target = self._get_target()
+        if not target:
+            return
+        try:
+            resp = requests.get(f"http://ip-api.com/json/{target}", timeout=10)
+            if resp.ok:
+                output = json.dumps(resp.json(), indent=2)
+            else:
+                output = f"GeoIP lookup failed: HTTP {resp.status_code}"
+        except Exception as exc:  # pragma: no cover - network dependent
+            output = f"GeoIP lookup failed: {exc}"
+        self._append_output(output)
+
+    # ------------------------------------------------------------------
+    def _append_output(self, text: str) -> None:
+        self.output.insert(tk.END, text + "\n\n")
+        self.output.see(tk.END)
+
+    # ------------------------------------------------------------------
+    def clear_output(self) -> None:
+        self.output.delete("1.0", tk.END)
+
+
+# ----------------------------------------------------------------------
+def main() -> None:
+    app = OSINTDashboard()
+    app.mainloop()
+
+
+if __name__ == "__main__":
+    main()
